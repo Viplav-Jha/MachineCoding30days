@@ -1,26 +1,59 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, FC } from "react";
+import ComponentsA from './components/ComponentsA';
+import ComponentsB from './components/ComponentsB';
+import "./A.css"; 
+import { items } from "./data";
+import { intersection, note } from "./utils";
 
-function App() {
+interface Props {
+  left: number;
+  right: number;
+  moveLeft: () => void
+  moveRight:()=>void
+  handleChecked:(item:void)=>void
+ 
+}
+
+const App: FC<Props> = () => {
+  const [leftItems, setLeftItems] = useState<number[]>(items);
+  const [rightItems, setRightItems] = useState<number[]>([]);
+  const [checkedItems,setCheckedItems] =useState<number[]>([])
+
+   const leftCheckedItem = intersection(checkedItems,leftItems)
+   const rightCheckedItem = intersection(checkedItems,rightItems)
+
+  const handleChecked =(item:number)=>{
+    const currentIndex =checkedItems.indexOf(item)
+    const newCheckedItems = [...checkedItems]
+  
+    if(currentIndex === -1){
+      newCheckedItems.push(item)
+    }else {
+      newCheckedItems.splice(currentIndex,1)
+    }
+    setCheckedItems(newCheckedItems)
+  }
+  const moveRight =()=>{
+    setRightItems(rightItems.concat(leftCheckedItem))
+    setLeftItems(note(leftItems,leftCheckedItem))
+    setCheckedItems(note(checkedItems,leftCheckedItem))
+  }
+  
+  console.log(checkedItems)
+
+  const moveLeft =()=>{
+    setLeftItems(leftItems.concat(rightCheckedItem))
+    setRightItems(note(rightItems,rightCheckedItem))
+    setCheckedItems(note(checkedItems,rightCheckedItem))
+  }
+  
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="App flex">
+      <ComponentsA items={leftItems} handleChecked={handleChecked} />
+      <ComponentsB moveLeft={moveLeft} moveRight={moveRight} />
+      <ComponentsA items={rightItems} handleChecked={handleChecked}  />
     </div>
   );
-}
+};
 
 export default App;
